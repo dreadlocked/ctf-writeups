@@ -33,7 +33,7 @@ GET /avatar/magikarp HTTP/1.0
 #### Not that easy, there's a "WAF"
 Testing some characters show us that there's some kind of check for the following chars:
 ```" ' . (space)```
-Why those characters and not others like > or <? Because obviously what they are trying to avoid is a NoSQL Injection, probably on a MongoDB database.
+Why those characters and not others like > or <? Because (not-so-obviously) what they are trying to avoid is a NoSQL Injection, probably on a MongoDB database.
 
 So logic seems to be:
 
@@ -55,7 +55,7 @@ H = Math.floor((C - 0x10000) / 0x400) + 0xD800
 L = (C - 0x10000) % 0x400 + 0xDC00
 ```
 
-Cool, at this point a hint is released, the hint are some emojis, so it's clear, we need some Unicode trick to bypass NodeJS checks. But, do not forget, those unicodes needs to have a sense for MongoDB, which is the final endpoint of our string.
+Cool, at this point a hint is released, the hint are some emojis, so it's clear, we need some Unicode trick to bypass NodeJS checks. But, do not forget, those unicodes needs to make sense for MongoDB, which is the final endpoint of our string.
 
 #### Error, error, error, error, victory!
 After a lot of testing and a key of my man X-C3LL, seems that MongoDB is reading the least significant byte of each surrogate pair, well, let's test if this is true using ```"||"1"=="1``` payload,  but remember, we can't just use ```"```, so we need to figure out a unicode which contains 0x22 and 0x7C as their least significant bytes of each surrogate pair.
@@ -80,7 +80,7 @@ L: 0xDC7C
 ```
 Their least significant byte's match with ```"```and ```|``` respectively.
 
-So we got some restrictions to bypass using this trick, those restrictions are the characters forbidden by backend controller, a bit of code help me to create strings based on this trick for the restricted characters:
+So we got some restrictions to bypass using this trick, those restrictions are the characters forbidden by backend controller, a bit of code helps me to create strings based on this trick for the restricted characters:
 
 ```
 # Takes pairs of characters where a forbidden char is and
@@ -118,7 +118,7 @@ Now we need to write a bit more code to exfiltrate data, byte by byte. After som
 This will return true only if the string starts with the _string_ value. Look at the script to get more details if you are unfamiliar with Blind techniques.
 
 #### Run and gimme the flag!
-Running the final script starts exfiltrating us the password for the user pikachu, character by character, but we know that flag's start with ```nn8ed{```, so some work is done:
+Running the final script starts exfiltrating us the password for the user pikachu, character by character, but we know that flag starts with ```nn8ed{```, so some work is done:
 ```
 Found! nn8ed{T
 Found! nn8ed{Th
@@ -127,6 +127,6 @@ Found! nn8ed{Thi
 Found! nn8ed{This.Old.Challenge.With.Unic0de}
 ```
 
-So there's the flag, super funny challenge, I learned a lot about how NodeJS 8 works with Unicode and how inconsistencies at encoding treatment can compromise a system. 
+So there's the flag. Super funny challenge, I learned a lot about how NodeJS 8 works with Unicode and how inconsistencies at encoding treatment can compromise a system. 
 
 Congratz to ka0labs.org for this great challenge!
