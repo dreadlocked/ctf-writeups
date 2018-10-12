@@ -6,9 +6,9 @@ Get the admin password! There is a WAF and it is NodeJS... Easy peasy!
 
 ### Intro
 This challenge presents us a classic NodeJS + Express app. Source code of index is:
-```
+```html
 <html>
-<!-- WebSite Created by the admin pikachu --!>
+<-- WebSite Created by the admin pikachu --!>
 <title>Welcome to our Pokemon-Tinder!!!!!</title>
 <body  style="background: pink">
 <center><h1>List of Users Registered in Tindermon</h1>
@@ -50,7 +50,7 @@ Well, at first, some tricks come to my mind, such as Orange Tsai's 2017 Black Ha
 This article give us some keys https://mathiasbynens.be/notes/javascript-unicode. As the article says, for backwards compatibility with ES5 and older standards,  unicode are divided in groups of two, each one of 2 bytes, this are called "surrogate pairs".
 
 So, for example, the emoji 💩 becomes ```\uD83D\uDCA9```. How this split is done? The answer is, again, in the same blog: https://mathiasbynens.be/notes/javascript-encoding
-```
+```javascript
 H = Math.floor((C - 0x10000) / 0x400) + 0xD800  
 L = (C - 0x10000) % 0x400 + 0xDC00
 ```
@@ -60,7 +60,7 @@ Cool, at this point a hint is released, the hint are some emojis, so it's clear,
 #### Error, error, error, error, victory!
 After a lot of testing and a key of my man X-C3LL, seems that MongoDB is reading the least significant byte of each surrogate pair, well, let's test if this is true using ```"||"1"=="1``` payload,  but remember, we can't just use ```"```, so we need to figure out a unicode which contains 0x22 and 0x7C as their least significant bytes of each surrogate pair.
 
-```
+```ruby
 # This receives a string of two characters, and looks for a unicode hex who's surrogate pairs least significant byte, match each character hex representation.
 def uni(find)
   for i in 0...0xFFFFF
@@ -82,7 +82,7 @@ Their least significant byte's match with ```"```and ```|``` respectively.
 
 So we got some restrictions to bypass using this trick, those restrictions are the characters forbidden by backend controller, a bit of code helps me to create strings based on this trick for the restricted characters:
 
-```
+```ruby
 # Takes pairs of characters where a forbidden char is and
 # converts it to unicode representation.
 def convert_forbidden(string)
