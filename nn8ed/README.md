@@ -31,23 +31,23 @@ GET /avatar/magikarp HTTP/1.0
 ```
 
 #### Not that easy, there's a "WAF"
-Testing some characters show us that there's some kind of check for the following chars:
+Testing some characters shows us that there's some kind of check for the following chars:
 ```" ' . (space)```
 Why those characters and not others like > or <? Because (not-so-obviously) what they are trying to avoid is a NoSQL Injection, probably on a MongoDB database.
 
 So logic seems to be:
 
 - Express router process the request.
-- Controller search for the URL parameter, which is everything following /avatar/ to the next "/" and is intended to be a username.
-- Looks for the username in MongoDB, if exists, returns a 302 redirection to users image path.
+- The controller searchs for the URL parameter, which is everything following /avatar/ to the next "/" and is intended to be a username.
+- Looks for the username on MongoDB, if exists, returns a 302 redirection to users image path.
 
-Easy right? We are in front a NoSQL Injection challenge like many others, but this time we need to figure out how to bypass NodeJS checks.
+Easy right? We are in front of a NoSQL Injection challenge like many others, but this time we need to figure out how to bypass NodeJS checks.
 
-Well, at first, some tricks come to my mind, such as Orange Tsai's 2017 Black Hat presentation about  NodeJS inconsistency on parsing Full-Width Characters: https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf
+Well, at first, some tricks come to my mind, such as Orange Tsai's 2017 Black Hat presentation about  NodeJS inconsistency on parsing Full-Width Characters: https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf but it doesn't seems to work on this case.
 
 #### Reading a bit about how JavaScript Unicode decoding standards works.
 
-This article give us some keys https://mathiasbynens.be/notes/javascript-unicode. As the article says, for backwards compatibility with ES5 and older standards,  unicode are divided in groups of two, each one of 2 bytes, this are called "surrogate pairs".
+This article gives us some keys https://mathiasbynens.be/notes/javascript-unicode. As the article says, for backwards compatibility with ES5 and older standards,  unicodes are divided in groups of two, each one of 2 bytes, those are called "surrogate pairs".
 
 So, for example, the emoji 💩 becomes ```\uD83D\uDCA9```. How this split is done? The answer is, again, in the same blog: https://mathiasbynens.be/notes/javascript-encoding
 ```javascript
@@ -55,7 +55,7 @@ H = Math.floor((C - 0x10000) / 0x400) + 0xD800
 L = (C - 0x10000) % 0x400 + 0xDC00
 ```
 
-Cool, at this point a hint is released, the hint are some emojis, so it's clear, we need some Unicode trick to bypass NodeJS checks. But, do not forget, those unicodes needs to make sense for MongoDB, which is the final endpoint of our string.
+Cool, at this point a hint is released, the hint are emojis, it seems clear that we need some Unicode trick to bypass NodeJS checks. But, do not forget, those unicodes needs to make sense for MongoDB, which is the final endpoint of our string.
 
 #### Error, error, error, error, victory!
 After a lot of testing and a key of my man X-C3LL, seems that MongoDB is reading the least significant byte of each surrogate pair, well, let's test if this is true using ```"||"1"=="1``` payload,  but remember, we can't just use ```"```, so we need to figure out a unicode which contains 0x22 and 0x7C as their least significant bytes of each surrogate pair.
