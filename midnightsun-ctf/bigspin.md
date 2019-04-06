@@ -47,8 +47,6 @@ So, let's see what happens, when we try to reach /pleb.127.0.0.1.nip.io/user/,
 
 Ding ding ding!!! Win!!! We reached /users/ folder, with shows us an Index folder where we can see an "nginx.cönf " file. To read it, my man @patatasfritas used double URL encoding, as Nginx is not that friendly when trying to read files with special characters.
 
-### 1/3 beating user level.
-
 The nginx.conf file contained the following directives:
 ```
  # omited for readability
