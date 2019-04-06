@@ -17,13 +17,13 @@ Author: avlidienbrunn
 Another cloud challenge, I love them! This challenge is about reaching ```
 admin``` privileges on a Cloud data storage platform.
 
-![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/cloudb_1.png)
+![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/cloudb/cloudb_1.png)
 
 The platform let you upload a profile pic by directly posting it to an Amazon AWS S3 bucket. The upload process consists on two different requests.
 
 - A GET to ```/signature``` path, passing an all and an HMAC sign as parameters. This request returns a base64 encoded JSON, with an AWS S3 bucket POST policy:
 
-![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/cloudb_3.png)
+![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/cloudb/cloudb_3.png)
 
 The decoded base64:
 ```json
@@ -39,7 +39,7 @@ The decoded base64:
 
 - A POST request to the Amazon AWS S3 bucket using the amazon standard for this kind of requests, explained here: https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
 
-![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/cloudb_4.png)
+![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/cloudb/cloudb_4.png)
 
 Seems like, first, we are creating a policy, then using this policy to POST our profile pic to the S3 bucket.
 
@@ -145,7 +145,7 @@ He just fucking tested ```Conditions``` instead of ```conditions```, and Amazon 
 
 The next step is do the same but this time, uploading an ```info.json``` to /users/idiotsctf@idiots.com/info.json, with the "admin" flag set to ```true```. And...
 
-![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/cloudb_final.png)
+![cloud1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/cloudb/cloudb_final.png)
 
 Ding ding ding!!! We are admin!!! And, of course, now we can go to ```/admin``` endpoint, authenticate and read the flag.
 
