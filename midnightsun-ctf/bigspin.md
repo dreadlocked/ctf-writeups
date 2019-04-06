@@ -26,7 +26,15 @@ First is first, let's see what this application looks like on it's root path:
 ```
 Ok so we have four kind of "privilege" levels, and probably we need to reach /uberadmin/ path, cool but, How? Trying to just navigate http://bigspin-01.play.midnightsunctf.se:3123/uberadmin/ shows us an Nginx 403 default error, the same occurs with /user, otherwise, /admin shows a 404. How about /pleb?.
 
-/pleb path returns a 200 OK with the HTML body of http://www.example.com/. Usually, when I face Nginx servers on CTFs and in some real-world cases, I instantly think about Nginx-alias path traversal vulenerabilities, so I tested /pleb../ and.. the server returns 502 Bad Gateway error. Wait, what? If not vulnerable, it should return 404, if vulnerable it should return 404 or 200, as we are asking for an existing file or path.
+/pleb path returns a 200 OK with the HTML body of http://www.example.com/. 
+
+![pleb1](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/bigspin_1.png)
+
+Usually, when I face Nginx servers on CTFs and in some real-world cases, I instantly think about Nginx-alias path traversal vulenerabilities, so I tested /pleb../ and.. the server returns 502 Bad Gateway error. 
+
+![pleb2](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/bigspin_2.png)
+
+Wait, what? If not vulnerable, it should return 404, if vulnerable it should return 404 or 200, as we are asking for an existing file or path.
 
 ### 1/3 beating user level.
 Now we have an unexpected behaviour, when the /pleb/ string is present on the path, the server returns the HTML body of example.com, this could be an indicative of ```proxy_pass``` Nginx directive acting as a reverse proxy to www.example.com, but if we add any characters to the end of /pleb, like /plebidiot, the server returns 502, this means that the server is trying to reach www.example.comidiot, as it can't reach that domain, it returns 502.
@@ -34,6 +42,8 @@ Now we have an unexpected behaviour, when the /pleb/ string is present on the pa
 Well, so now we know that some kind of SSRF can be done here, my man @dj.thd told us, what if you use a dynamically resolver dns server based on level1 subdomain, and ignoring  other low-level subdomains? Like this www.example.com.127.0.0.1.idiots.com -> 127.0.0.1. Great idea, fortunately for us, there's a service that does exactly this, nip.io. 
 
 So, let's see what happens, when we try to reach /pleb.127.0.0.1.nip.io/user/,
+
+![pleb3](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/bigspin_3.png)
 
 Ding ding ding!!! Win!!! We reached /users/ folder, with shows us an Index folder where we can see an "nginx.cönf " file. To read it, my man @patatasfritas used double URL encoding, as Nginx is not that friendly when trying to read files with special characters.
 
@@ -109,6 +119,8 @@ Ding ding ding!!! Win!!! Another win, now we can reach /admin location.
 
 ### 3/3 beating uberadmin level.
 This level was easy peasy, as when seeing the Nginx configuration file, it highlights the alias traversal on /admin location, so we just need to configure our python server with ```X-Accel-Redirect: /admin..uberadmin/flag.txt``` and...
+
+![pleb4](https://raw.githubusercontent.com/dreadlocked/ctf-writeups/master/images/bigspin/bigspin_4.png)
 
 Win!!! We got the flag.
 
